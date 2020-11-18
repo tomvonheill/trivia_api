@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
-from models import setup_db, Question, Category
+from models import setup_db, Question, Category, db
 
 QUESTIONS_PER_PAGE = 10
 
@@ -17,7 +17,7 @@ def create_app(test_config=None):
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
-
+  cors = CORS(app)
   '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
   '''
@@ -27,8 +27,12 @@ def create_app(test_config=None):
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
-  @app.route("/")
-  def test():
+  @app.route("/categories", methods = ['GET'])
+  def get_categories():
+    return jsonify({'categories':[category.type for category in db.session.query(Category).all()]})
+  
+  @app.route("/", methods = ['GET'])
+  def homepage():
     return jsonify({
         'success': True
     })
