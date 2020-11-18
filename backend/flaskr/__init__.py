@@ -10,6 +10,7 @@ QUESTIONS_PER_PAGE = 10
 
 def create_app(test_config=None):
   # create and configure the app
+  #this is the appliction factory
   app = Flask(__name__)
   setup_db(app)
   
@@ -26,6 +27,11 @@ def create_app(test_config=None):
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
+  @app.route("/")
+  def test():
+    return jsonify({
+        'success': True
+    })
 
 
   '''
