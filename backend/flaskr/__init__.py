@@ -27,10 +27,10 @@ def create_app(test_config=None):
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
-  @app.route("/categories", methods = ['GET'])
+  @app.route('/categories', methods = ['GET'])
   def get_categories():
-    return jsonify({'categories':[category.type for category in db.session.query(Category).all()]})
-  
+    return jsonify({category.id : category.type for category in db.session.query(Category).all()})
+
   @app.route("/", methods = ['GET'])
   def homepage():
     return jsonify({
@@ -50,6 +50,28 @@ def create_app(test_config=None):
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
   '''
+
+  @app.route('/questions', methods = ['GET'])
+  def get_questions():
+    page = int(request.args.get('page',1))
+    if page:
+      lower_bound = (page-1)*10
+      upper_bound = lower_bound+10
+
+      questions = db.session.query(Question).all()
+
+      return jsonify({
+      'questions': [question.question for question in questions[lower_bound:upper_bound]],
+      'page': page,
+      'total_questions': len(questions),
+      'categories': [question.category for question in questions[lower_bound:upper_bound]],
+      'current_category': None,
+      })
+    else:
+      return None
+
+
+
 
   '''
   @TODO: 
