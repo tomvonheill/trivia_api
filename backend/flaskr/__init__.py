@@ -61,10 +61,10 @@ def create_app(test_config=None):
       questions = db.session.query(Question).all()
 
       return jsonify({
-      'questions': [question.question for question in questions[lower_bound:upper_bound]],
+      'questions': [question.format() for question in questions[lower_bound:upper_bound]],
       'page': page,
       'total_questions': len(questions),
-      'categories': [question.category for question in questions[lower_bound:upper_bound]],
+      'categories': [category.type for category in db.session.query(Category).all()],
       'current_category': None,
       })
     else:
