@@ -110,8 +110,6 @@ def create_app(test_config=None):
 
   @app.route('/questions', methods = ['POST'])
   def post_question():
-    x = 2
-    y=3
     try:
       new_question = Question(**request.json)
       db.session.add(new_question)
