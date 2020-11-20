@@ -3,6 +3,7 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
+from sqlalchemy import func
 
 from models import setup_db, Question, Category, db
 
@@ -139,6 +140,23 @@ def create_app(test_config=None):
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
+
+  @app.route('/questions/search', methods = ['POST'])
+  def search_questions():
+    page = int(request.args.get('page',1))
+    if page:
+      lower_bound = (page-1)*10
+      upper_bound = lower_bound+10
+      search_term = request.json.get('searchTerm')
+      questions = db.session.query(Question).filter(func.lower(Question.question).contains(func.lower(search_term))).all()
+
+    return jsonify({
+    'questions': [question.format() for question in questions[lower_bound:upper_bound]],
+    'page': page,
+    'total_questions': len(questions),
+    'categories': [category.type for category in db.session.query(Category).all()],
+    'current_category': None,
+    })
 
   '''
   @TODO: 
