@@ -108,6 +108,29 @@ def create_app(test_config=None):
   of the questions list in the "List" tab.  
   '''
 
+  @app.route('/questions', methods = ['POST'])
+  def post_question():
+    x = 2
+    y=3
+    try:
+      new_question = Question(**request.json)
+      db.session.add(new_question)
+      db.session.commit()
+      return jsonify({
+      'question_added': new_question.format(),
+      'success':True,
+    })
+
+    except:
+      db.session.rollback()
+      abort(422)
+    finally:
+      db.session.close()
+    return jsonify({
+      'question_added': None,
+      'success':False,
+    })
+
   '''
   @TODO: 
   Create a POST endpoint to get questions based on a search term. 
