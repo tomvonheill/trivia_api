@@ -141,6 +141,26 @@ class TriviaTestCase(unittest.TestCase):
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'No questions found for searchterm: asdf0988670987')
     
+    #=========== get_questions_by_category tests================
+    def test_successful_get_questions_by_category(self):
+        url = '/categories/0/questions'
+        res = self.client().get(url)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['current_category'], 'Science')
+        self.assertTrue(all([1 == question['category'] for question in data['questions']]))
+    
+    def test_unsuccessful_get_questions_by_category(self):
+        url = '/categories/7/questions'
+        res = self.client().get(url)
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 404)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'No questions for category id 7')
+    
+    #=============== get_questions_for_game tests============
     
 
 

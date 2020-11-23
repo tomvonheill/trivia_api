@@ -22,6 +22,21 @@ def create_app(test_config=None):
   '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
   '''
+  @app.errorhandler(404)
+  def questions_not_found(error):
+    error_data = {
+        'success' : False,
+        'error' : 404,}
+    error_data['message'] =error.description
+    return jsonify(error_data),404
+
+  @app.errorhandler(422)
+  def unprocessable_request(error):
+    return jsonify({
+      'success' : False,
+      'error' : 422,
+      'message' : error.description
+    }), 422
 
   def page_lower_and_upper_bound(page):
       lower_bound = (page-1)*10
@@ -56,21 +71,6 @@ def create_app(test_config=None):
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
   '''
-  @app.errorhandler(404)
-  def questions_not_found(error):
-    error_data = {
-        'success' : False,
-        'error' : 404,}
-    error_data['message'] =error.description
-    return jsonify(error_data),404
-
-  @app.errorhandler(422)
-  def unprocessable_request(error):
-    return jsonify({
-      'success' : False,
-      'error' : 422,
-      'message' : error.description
-    }), 422
 
   @app.route('/questions', methods = ['GET'])
   def get_questions():
@@ -173,22 +173,22 @@ def create_app(test_config=None):
   '''
   @app.route('/categories/<int:category_id>/questions', methods = ['GET'])
   def get_questions_by_category(category_id):
+    page = int(request.args.get('page',1))
+    lower_bound, upper_bound = page_lower_and_upper_bound(page)
     try:
-      page = int(request.args.get('page',1))
-      lower_bound, upper_bound = page_lower_and_upper_bound(page)
       category_name = db.session.query(Category).get(category_id+1).type
-      questions = db.session.query(Question).filter(Question.category == category_id+1).all()
-      if not questions:
-        questions_not_found()
-      return jsonify({
-      'questions': [question.format() for question in questions],
-      'page': page,
-      'total_questions': len(questions),
-      'categories': [category.type for category in db.session.query(Category).all()],
-      'current_category': category_name,
-        })
     except:
-      unprocessable_request()
+      abort(404, description= f'No questions for category id {category_id}')
+    questions = db.session.query(Question).filter(Question.category == category_id+1).all()
+    if not questions:
+      abort(404, description= f'No questions for category id {category_id}')
+    return jsonify({
+    'questions': [question.format() for question in questions],
+    'page': page,
+    'total_questions': len(questions),
+    'categories': [category.type for category in db.session.query(Category).all()],
+    'current_category': category_name,
+      })
 
   '''
   @TODO: 
