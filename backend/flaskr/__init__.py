@@ -64,7 +64,7 @@ def create_app(test_config=None):
       'message' : 'No questions can be found'
     }, 404)
   
-    @app.errorhandler(404)
+  @app.errorhandler(404)
   def question_not_found(error):
     return jsonify({
       'success' : False,
