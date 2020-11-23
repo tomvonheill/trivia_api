@@ -69,7 +69,7 @@ def create_app(test_config=None):
     return jsonify({
       'success' : False,
       'error' : 422,
-      'message' : 'Unprocessable request'
+      'message' : error.description
     }), 422
 
   @app.route('/questions', methods = ['GET'])
@@ -131,9 +131,9 @@ def create_app(test_config=None):
       'success':True,
     })
 
-    except e as error:
+    except:
       db.session.rollback()
-      abort(422, description=f'error when adding question')
+      abort(422, description= 'Error when adding question')
     finally:
       db.session.close()
   '''

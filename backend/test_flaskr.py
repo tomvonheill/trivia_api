@@ -90,6 +90,39 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'Question id 18 not found. Delete failed.')
+    
+    #=========post_question tests===========
+    def test_successfully_post_question(self):
+        url = '/questions'
+        json_post_data = {
+            'question': 'new question',
+            'answer': 'new answer',
+            'category': '2',
+            'difficulty': 4
+        }
+        res = self.client().post(url, json = json_post_data)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code,200)
+        self.assertTrue(data['success'])
+    
+    def test_unsuccessfully_post_question(self):
+        url = '/questions'
+        json_post_data = {
+            'question': 'new question',
+            'answer': 'new answer',
+            'category': '2',
+            'difficulty': 4,
+            '_BAD_ARG_':'_BAD_ARG_'
+        }
+        res = self.client().post(url, json = json_post_data)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code,422)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Error when adding question')
+    
+
+
+
 
 
 
