@@ -23,6 +23,11 @@ def create_app(test_config=None):
   @TODO: Use the after_request decorator to set Access-Control-Allow
   '''
 
+  def page_lower_and_upper_bound(page):
+      lower_bound = (page-1)*10
+      upper_bound = lower_bound+10
+      return lower_bound, upper_bound
+
   '''
   @TODO: 
   Create an endpoint to handle GET requests 
@@ -56,8 +61,7 @@ def create_app(test_config=None):
   def get_questions():
     page = int(request.args.get('page',1))
     if page:
-      lower_bound = (page-1)*10
-      upper_bound = lower_bound+10
+      lower_bound, upper_bound = page_lower_and_upper_bound(page)
 
       questions = db.session.query(Question).all()
 
@@ -143,20 +147,24 @@ def create_app(test_config=None):
 
   @app.route('/questions/search', methods = ['POST'])
   def search_questions():
-    page = int(request.args.get('page',1))
-    if page:
-      lower_bound = (page-1)*10
-      upper_bound = lower_bound+10
-      search_term = request.json.get('searchTerm')
-      questions = db.session.query(Question).filter(func.lower(Question.question).contains(func.lower(search_term))).all()
+    try:
+      page = int(request.args.get('page',1))
+      if page:
+        lower_bound, upper_bound = page_lower_and_upper_bound(page)
+        search_term = request.json.get('searchTerm')
+        questions = db.session.query(Question).filter(func.lower(Question.question).contains(func.lower(search_term))).all()
+        if not questions:
+          return abort(404)
 
-    return jsonify({
-    'questions': [question.format() for question in questions[lower_bound:upper_bound]],
-    'page': page,
-    'total_questions': len(questions),
-    'categories': [category.type for category in db.session.query(Category).all()],
-    'current_category': None,
-    })
+      return jsonify({
+      'questions': [question.format() for question in questions[lower_bound:upper_bound]],
+      'page': page,
+      'total_questions': len(questions),
+      'categories': [category.type for category in db.session.query(Category).all()],
+      'current_category': None,
+      })
+    except:
+      abort(422)
 
   '''
   @TODO: 
@@ -169,8 +177,7 @@ def create_app(test_config=None):
   @app.route('/categories/<int:category_id>/questions', methods = ['GET'])
   def get_questions_by_category(category_id):
     page = int(request.args.get('page',1))
-    lower_bound = (page-1)*10
-    upper_bound = lower_bound+10
+    lower_bound, upper_bound = page_lower_and_upper_bound(page)
     category_name = db.session.query(Category).get(category_id+1).type
     questions = db.session.query(Question).filter(Question.category == category_id+1).all()
     return jsonify({
