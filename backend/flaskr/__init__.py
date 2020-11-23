@@ -169,12 +169,11 @@ def create_app(test_config=None):
   def search_questions():
     try:
       page = int(request.args.get('page',1))
-      if page:
-        lower_bound, upper_bound = page_lower_and_upper_bound(page)
-        search_term = request.json.get('searchTerm')
-        questions = db.session.query(Question).filter(func.lower(Question.question).contains(func.lower(search_term))).all()
-        if not questions:
-          return questions_not_found()
+      lower_bound, upper_bound = page_lower_and_upper_bound(page)
+      search_term = request.json.get('searchTerm')
+      questions = db.session.query(Question).filter(func.lower(Question.question).contains(func.lower(search_term))).all()
+      if not questions:
+        return questions_not_found()
 
       return jsonify({
       'questions': [question.format() for question in questions[lower_bound:upper_bound]],
@@ -196,17 +195,22 @@ def create_app(test_config=None):
   '''
   @app.route('/categories/<int:category_id>/questions', methods = ['GET'])
   def get_questions_by_category(category_id):
-    page = int(request.args.get('page',1))
-    lower_bound, upper_bound = page_lower_and_upper_bound(page)
-    category_name = db.session.query(Category).get(category_id+1).type
-    questions = db.session.query(Question).filter(Question.category == category_id+1).all()
-    return jsonify({
-    'questions': [question.format() for question in questions],
-    'page': page,
-    'total_questions': len(questions),
-    'categories': [category.type for category in db.session.query(Category).all()],
-    'current_category': category_name,
-      })
+    try:
+      page = int(request.args.get('page',1))
+      lower_bound, upper_bound = page_lower_and_upper_bound(page)
+      category_name = db.session.query(Category).get(category_id+1).type
+      questions = db.session.query(Question).filter(Question.category == category_id+1).all()
+      if not questions:
+        questions_not_found()
+      return jsonify({
+      'questions': [question.format() for question in questions],
+      'page': page,
+      'total_questions': len(questions),
+      'categories': [category.type for category in db.session.query(Category).all()],
+      'current_category': category_name,
+        })
+    except:
+      uprocessable_request()
 
   '''
   @TODO: 
@@ -219,6 +223,27 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
+  @app.route('/quizzes', methods = ['GET', 'POST'])
+  def get_question_for_game():
+    x=12
+    #what is being put in previous questions
+    # previous_questions: previousQuestions,
+    # quiz_category: this.state.quizCategory
+    #{'previous_questions': [19, 15, 9], 'quiz_category': {'id': 0, 'type': 'click'}}
+    try:
+      category = 'all' if type(request.json.get('quiz_category').get('id')) == int else int(request.json.get('quiz_category').get('id'))
+      
+      if category == 'all':
+        questions = db.session.query(Question).filter(Question.id.notin_(request.json.get('previous_questions'))).all()
+      else:
+        questions = db.session.query(Question).filter(Question.category == category+1).filter(Question.id.notin_(request.json.get('previous_questions'))).all()
+      
+      if questions:
+        return jsonify({'question':questions[random.randint(0,len(questions)-1)].format()})
+      return jsonify({'question':None})
+    except:
+      uprocessable_request()
+
 
   '''
   @TODO: 
