@@ -61,10 +61,7 @@ def create_app(test_config=None):
     error_data = {
         'success' : False,
         'error' : 404,}
-    if request.path.startswith('/questions'):
-      error_data['message'] =error.description
-    elif request.path.startswith('/question'):
-      error_data['message'] = 'That question cannot be found'
+    error_data['message'] =error.description
     return jsonify(error_data),404
 
   @app.errorhandler(422)
@@ -110,7 +107,7 @@ def create_app(test_config=None):
       'question_id_deleted': question_id,
       'success':True,}
       )
-    abort(404)
+    abort(404, description = f'Question id {question_id} not found. Delete failed.')
 
   '''
   @TODO: 

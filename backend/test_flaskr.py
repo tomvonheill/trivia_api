@@ -4,7 +4,7 @@ import json
 from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app
-from models import setup_db, Question, Category
+from models import setup_db, Question, Category, db
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -42,6 +42,7 @@ class TriviaTestCase(unittest.TestCase):
     Write at least one test for each test for successful operation and for expected errors.
     """
 
+    #======= get_categories tests==========
     def test_get_all_categories(self):
         res = self.client().get('/categories')
         data = json.loads(res.data)
@@ -55,11 +56,12 @@ class TriviaTestCase(unittest.TestCase):
         }
         self.assertEqual(data, category_information)
     
+    #========get_questions tests============
     def test_get_questions_sucess(self):
         res = self.client().get('/questions?page=1')
         data = json.loads(res.data)
         categories = ['Science','Art','Geography','History','Entertainment','Sports']
-        #self.assertEqual(data.keys(),1)
+
         self.assertEqual(data['page'],1)
         self.assertEqual(data['categories'],categories)
         self.assertTrue(len(data['questions'])>0)
@@ -68,12 +70,27 @@ class TriviaTestCase(unittest.TestCase):
     def test_get_questions_unreachable_page(self):
         res = self.client().get('/questions?page=66')
         data = json.loads(res.data)
-        #self.assertEqual(data.keys(),1)
-        print(json.loads(res.data))
-        print(res.status_code)
+
         self.assertEqual(res.status_code, 404)
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'Page 66 is out of range. No questions found.')
+    
+    #==========delete_question tests===========
+
+    def test_succesfully_delete_question(self):
+        res = self.client().delete('/questions/18')
+        data = json.loads(res.data)
+        self.assertEqual(data['question_id_deleted'], 18)
+        self.assertTrue(data['success'])
+        self.assertIsNone(db.session.query(Question).get(18))
+    
+    def test_unsuccesful_delete_of_missing_question(self):
+        res = self.client().delete('/questions/18')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Question id 18 not found. Delete failed.')
+
 
 
 
