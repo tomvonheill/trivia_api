@@ -73,7 +73,7 @@ def create_app(test_config=None):
     }, 404)
   
   @app.errorhandler(422)
-  def uprocessable_request(error):
+  def unprocessable_request(error):
     return jsonify({
       'success' : False,
       'error' : 422,
@@ -82,18 +82,21 @@ def create_app(test_config=None):
 
   @app.route('/questions', methods = ['GET'])
   def get_questions():
-    page = int(request.args.get('page',1))
-    lower_bound, upper_bound = page_lower_and_upper_bound(page)
-    questions = db.session.query(Question).all()
-    if not questions:
-      questions_not_found()
-    return jsonify({
-    'questions': [question.format() for question in questions[lower_bound:upper_bound]],
-    'page': page,
-    'total_questions': len(questions),
-    'categories': [category.type for category in db.session.query(Category).all()],
-    'current_category': None,
-    })
+    try:
+      page = int(request.args.get('page',1))
+      lower_bound, upper_bound = page_lower_and_upper_bound(page)
+      questions = db.session.query(Question).all()
+      if len(questions[lower_bound:upper_bound])==0:
+        questions_not_found()
+      return jsonify({
+      'questions': [question.format() for question in questions[lower_bound:upper_bound]],
+      'page': page,
+      'total_questions': len(questions),
+      'categories': [category.type for category in db.session.query(Category).all()],
+      'current_category': None,
+      })
+    except:
+      unprocessable_request()
 
 
 
@@ -120,7 +123,7 @@ def create_app(test_config=None):
     })
 
     except:
-      uprocessable_request()
+      unprocessable_request()
 
   '''
   @TODO: 
@@ -183,7 +186,7 @@ def create_app(test_config=None):
       'current_category': None,
       })
     except:
-      uprocessable_request()
+      unprocessable_request()
 
   '''
   @TODO: 
@@ -210,7 +213,7 @@ def create_app(test_config=None):
       'current_category': category_name,
         })
     except:
-      uprocessable_request()
+      unprocessable_request()
 
   '''
   @TODO: 
@@ -241,7 +244,7 @@ def create_app(test_config=None):
         return jsonify({'question':questions[random.randint(0,len(questions)-1)].format()})
       return jsonify({'question':None})
     except:
-      uprocessable_request()
+      unprocessable_request()
 
 
   '''
