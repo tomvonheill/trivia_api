@@ -225,7 +225,6 @@ def create_app(test_config=None):
   '''
   @app.route('/quizzes', methods = ['GET', 'POST'])
   def get_question_for_game():
-    x=12
     #what is being put in previous questions
     # previous_questions: previousQuestions,
     # quiz_category: this.state.quizCategory
