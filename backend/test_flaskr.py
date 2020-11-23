@@ -68,7 +68,6 @@ class TriviaTestCase(unittest.TestCase):
     def test_get_questions_unreachable_page(self):
         res = self.client().get('/questions?page=66')
         data = json.loads(res.data)
-        categories = ['Science','Art','Geography','History','Entertainment','Sports']
         #self.assertEqual(data.keys(),1)
         self.assertEqual(res.status_code, 404)
         self.assertFalse(res['success'])
