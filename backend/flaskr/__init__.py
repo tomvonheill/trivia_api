@@ -65,23 +65,15 @@ def create_app(test_config=None):
       error_data['message'] =error.description
     elif request.path.startswith('/question'):
       error_data['message'] = 'That question cannot be found'
-    return jsonify(error_data,404)
-  
-  # @app.errorhandler(404)
-  # def question_not_found(error):
-  #   return jsonify({
-  #     'success' : False,
-  #     'error' : 404,
-  #     'message' : 'That question cannot be found'
-  #   }, 404)
-  
+    return jsonify(error_data),404
+
   @app.errorhandler(422)
   def unprocessable_request(error):
     return jsonify({
       'success' : False,
       'error' : 422,
       'message' : 'Unprocessable request'
-    }, 422)
+    }), 422
 
   @app.route('/questions', methods = ['GET'])
   def get_questions():

@@ -69,9 +69,11 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().get('/questions?page=66')
         data = json.loads(res.data)
         #self.assertEqual(data.keys(),1)
+        print(json.loads(res.data))
+        print(res.status_code)
         self.assertEqual(res.status_code, 404)
-        self.assertFalse(res['success'])
-        self.assertEqual(res['message'], 'No questions can be found')
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Page 66 is out of range. No questions found.')
 
 
 
