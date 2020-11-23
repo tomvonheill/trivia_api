@@ -56,24 +56,44 @@ def create_app(test_config=None):
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
   '''
+  @app.errorhandler(404)
+  def questions_not_found(error):
+    return jsonify({
+      'success' : False,
+      'error' : 404,
+      'message' : 'No questions can be found'
+    }, 404)
+  
+    @app.errorhandler(404)
+  def question_not_found(error):
+    return jsonify({
+      'success' : False,
+      'error' : 404,
+      'message' : 'That question cannot be found'
+    }, 404)
+  
+  @app.errorhandler(422)
+  def uprocessable_request(error):
+    return jsonify({
+      'success' : False,
+      'error' : 422,
+      'message' : 'Unprocessable request'
+    }, 422)
 
   @app.route('/questions', methods = ['GET'])
   def get_questions():
     page = int(request.args.get('page',1))
-    if page:
-      lower_bound, upper_bound = page_lower_and_upper_bound(page)
-
-      questions = db.session.query(Question).all()
-
-      return jsonify({
-      'questions': [question.format() for question in questions[lower_bound:upper_bound]],
-      'page': page,
-      'total_questions': len(questions),
-      'categories': [category.type for category in db.session.query(Category).all()],
-      'current_category': None,
-      })
-    else:
-      return None
+    lower_bound, upper_bound = page_lower_and_upper_bound(page)
+    questions = db.session.query(Question).all()
+    if not questions:
+      questions_not_found()
+    return jsonify({
+    'questions': [question.format() for question in questions[lower_bound:upper_bound]],
+    'page': page,
+    'total_questions': len(questions),
+    'categories': [category.type for category in db.session.query(Category).all()],
+    'current_category': None,
+    })
 
 
 
@@ -90,7 +110,7 @@ def create_app(test_config=None):
     try:
       question = db.session.query(Question).get(question_id)
       if not question:
-        abort(404)
+        question_not_found()
 
       question.delete()
       db.session.commit()
@@ -100,7 +120,7 @@ def create_app(test_config=None):
     })
 
     except:
-      abort(422)
+      uprocessable_request()
 
   '''
   @TODO: 
@@ -154,7 +174,7 @@ def create_app(test_config=None):
         search_term = request.json.get('searchTerm')
         questions = db.session.query(Question).filter(func.lower(Question.question).contains(func.lower(search_term))).all()
         if not questions:
-          return abort(404)
+          return questions_not_found()
 
       return jsonify({
       'questions': [question.format() for question in questions[lower_bound:upper_bound]],
@@ -164,7 +184,7 @@ def create_app(test_config=None):
       'current_category': None,
       })
     except:
-      abort(422)
+      uprocessable_request()
 
   '''
   @TODO: 
