@@ -149,23 +149,19 @@ def create_app(test_config=None):
 
   @app.route('/questions/search', methods = ['POST'])
   def search_questions():
-    try:
-      page = int(request.args.get('page',1))
-      lower_bound, upper_bound = page_lower_and_upper_bound(page)
-      search_term = request.json.get('searchTerm')
-      questions = db.session.query(Question).filter(func.lower(Question.question).contains(func.lower(search_term))).all()
-      if not questions:
-        return questions_not_found()
-
-      return jsonify({
-      'questions': [question.format() for question in questions[lower_bound:upper_bound]],
-      'page': page,
-      'total_questions': len(questions),
-      'categories': [category.type for category in db.session.query(Category).all()],
-      'current_category': None,
-      })
-    except:
-      unprocessable_request()
+    page = int(request.args.get('page',1))
+    lower_bound, upper_bound = page_lower_and_upper_bound(page)
+    search_term = request.json.get('searchTerm')
+    questions = db.session.query(Question).filter(func.lower(Question.question).contains(func.lower(search_term))).all()
+    if not questions[lower_bound:upper_bound]:
+      return abort(404, description = f'No questions found for searchterm: {search_term}')
+    return jsonify({
+    'questions': [question.format() for question in questions[lower_bound:upper_bound]],
+    'page': page,
+    'total_questions': len(questions),
+    'categories': [category.type for category in db.session.query(Category).all()],
+    'current_category': None,
+    })
 
   '''
   @TODO: 

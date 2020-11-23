@@ -120,6 +120,28 @@ class TriviaTestCase(unittest.TestCase):
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'Error when adding question')
     
+    #========== search_questions tests==============
+    def test_successful_question_search(self):
+        url = '/questions/search'
+        json_post_data = {'searchTerm': 'world'}
+        res = self.client().post(url, json = json_post_data)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['total_questions'], 2)
+        self.assertEqual(len(data['questions']), 2)
+    
+    def test_unsuccessful_question_search(self):
+        url = '/questions/search'
+        json_post_data = {'searchTerm': 'asdf0988670987'}
+        res = self.client().post(url, json = json_post_data)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'No questions found for searchterm: asdf0988670987')
+    
+    
 
 
 
