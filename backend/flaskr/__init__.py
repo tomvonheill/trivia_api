@@ -201,25 +201,22 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
-  @app.route('/quizzes', methods = ['GET', 'POST'])
+  @app.route('/quizzes', methods = ['POST'])
   def get_question_for_game():
     #what is being put in previous questions
     # previous_questions: previousQuestions,
     # quiz_category: this.state.quizCategory
     #{'previous_questions': [19, 15, 9], 'quiz_category': {'id': 0, 'type': 'click'}}
-    try:
-      category = 'all' if type(request.json.get('quiz_category').get('id')) == int else int(request.json.get('quiz_category').get('id'))
-      
-      if category == 'all':
-        questions = db.session.query(Question).filter(Question.id.notin_(request.json.get('previous_questions'))).all()
-      else:
-        questions = db.session.query(Question).filter(Question.category == category+1).filter(Question.id.notin_(request.json.get('previous_questions'))).all()
-      
-      if questions:
-        return jsonify({'question':questions[random.randint(0,len(questions)-1)].format()})
-      return jsonify({'question':None})
-    except:
-      unprocessable_request()
+    category = 'all' if type(request.json.get('quiz_category').get('id')) == int else int(request.json.get('quiz_category').get('id'))
+    
+    if category == 'all':
+      questions = db.session.query(Question).filter(Question.id.notin_(request.json.get('previous_questions'))).all()
+    else:
+      questions = db.session.query(Question).filter(Question.category == category+1).filter(Question.id.notin_(request.json.get('previous_questions'))).all()
+    
+    if questions:
+      return jsonify({'question':questions[random.randint(0,len(questions)-1)].format()})
+    return jsonify({'question':None})
 
 
   '''

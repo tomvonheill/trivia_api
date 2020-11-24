@@ -162,6 +162,15 @@ class TriviaTestCase(unittest.TestCase):
     
     #=============== get_questions_for_game tests============
     
+    def test_successfully_get_question_for_game(self):
+        url = '/quizzes'
+        json_post_data = {'previous_questions': [], 'quiz_category':{'id':'5'}}
+        res = self.client().post(url, json = json_post_data)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['question']['id'] in [10,11])
+
 
 
 
