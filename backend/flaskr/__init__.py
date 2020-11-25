@@ -51,14 +51,6 @@ def create_app(test_config=None):
   @app.route('/categories', methods = ['GET'])
   def get_categories():
     return jsonify({category.id : category.type for category in db.session.query(Category).all()})
-
-  @app.route("/", methods = ['GET'])
-  def homepage():
-    return jsonify({
-        'success': True
-    })
-
-
   '''
   @TODO: 
   Create an endpoint to handle GET requests for questions, 

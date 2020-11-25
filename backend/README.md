@@ -66,28 +66,119 @@ One note before you delve into your tasks: for each endpoint you are expected to
 8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
 9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
 
-REVIEW_COMMENT
+## API endpoints
+
+GET '/categories'
+GET '/questions'
+POST '/questions'
+DELETE '/questions/<int:question_id>'
+POST '/questions/search'
+GET '/categories/<int:category_id>/questions'
+POST '/quizzes'
+
+### GET '/categories'
+* * *
+- **Description:** Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+- **Request Arguments:** None
+- **Returns:** An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
 ```
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
-
-Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
-
-GET '/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
-- Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
 {'1' : "Science",
 '2' : "Art",
 '3' : "Geography",
 '4' : "History",
 '5' : "Entertainment",
 '6' : "Sports"}
-
 ```
+
+
+### GET '/questions'
+* * *
+- **Description:** This will retrieve questions for you including the questions, page, total_question, categories, and current_category. It will return a 'page's' worth of questions which is equal to 10 questions.
+- **Request Arguments:** A request argument is 'page' which should be an integer. If not given the page defaults to 1. 
+- **Returns:**
+```
+{'questions': list of questions on given page],
+'page': page requested,
+'total_questions': total number of questions (not just on this page),
+'categories': list of all categories,
+'current_category': None}
+```
+
+### POST '/questions'
+* * *
+- **Description:** Post a new question, requires the questions, answer, category, and difficulty score
+- **Request Arguments:** None
+- **Post Arguments:**
+```
+{'question': text for what question to ask (str),
+'answer' : the answer to the question (str),
+'category': category of the question (int),
+'difficulty': difficulty of the question (1-5) (int)
+}
+```
+- **Returns:** 
+	- **On Success**: will return a dictionary with the id of the new question, and the success being true {'question_added': id, 'success': True}
+	- **On Success**: aborts 422 with a message.
+
+### DELETE '/questions/<<int:question_id>>'
+* * *
+- **Description:** allows you to delete a specific question supplying a integer for the question id you want to delete
+- **Request Arguments:**
+- **Returns:**
+	- **On success**: returns a dictionary with the id of the question deleted and success of True {'question_id_delted': question_id, 'success': True}
+	- **On Failure** sborts 404 with a message
+
+### POST '/questions/search'
+* * *
+- **Description:** case insensitive search for a question using a searchterm.
+- **Request Arguments:** A request argument is 'page' which should be an integer. If not given the page defaults to 1. 
+- **Post Arguments:**
+```
+{
+'searchTerm': substring of question we are looking for.
+}
+```
+- **Returns:** 
+	- **On Success**: will return a dictionary with question, page, total questions, categories, and current category.
+ ```
+{'questions': list of questions on given page that match the search term,
+ 'page': page requested,
+ 'total_questions': total number of questions (not just on this page),
+ 'categories': list of all categories,
+ 'current_category': None}
+```
+
+### GET '/categories/<<int:category_id>>/questions'
+* * *
+- **Description:** gets teh questions for a given category (int:category_id) and returns a the page specified by the request arguments. 10 questions per page, will default to page 1 if no arguments are given.
+- **Request Arguments:** A request argument is 'page' which should be an integer. If not given the page defaults to 1. 
+- **Returns**
+	- **On Success**: will return a dictionary with question, page, total questions, categories, and current category.
+ ```
+{'questions': list of questions on given page that match the search term,
+ 'page': page requested,
+ 'total_questions': total number of questions (not just on this page),
+ 'categories': list of all categories,
+ 'current_category': category specified by category_id}
+```
+
+
+### POST '/quizzes'
+* * *
+- **Description:** retrieves a random question for a given quiz category that is not one of the questions played before. Quiz category and questions played must be sent from client, the server does not keep track of the client's quiz progress.
+- **Request Arguments:** None
+- **Post Arguments:**  Post takes a dictionary with 'previous_questions' and 'quiz_category' as keys. Quiz category further has a interior dictionary that contains the key 'id' which is for determining the quiz category. 
+- example: {'previous_questions': [19, 15, 9], 'quiz_category': {'id': 1, 'type': 'click'}} In this example we see taht the previous questions with ids 19, 15, 9 were played before and cannot show up. Also we see the 'id' of the quiz is 1 which will make sure we are returning a random question of category 1.
+- **Returns:** 
+	- **On Success**: will return a random question in the category that is not one of the previous_questions
+ ```
+{'question': 'question sample string?',
+ 'answer': 'answer to question retrieved',
+ 'category': category int,
+ 'difficulty': difficulty int between 0 and 5
+ }
+ ```
+ 
 
 
 ## Testing
